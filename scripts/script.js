@@ -1,14 +1,20 @@
 // script.js
 
 import { icons } from './icons.js';
+import { Counter } from './counter.js';
 
 const settingsInputs = document.querySelector('.settings').getElementsByTagName('input');
-const settingsAlert = document.querySelector('.settings').querySelector('.alert');
-const settingsButtons = document.querySelector('.settings').getElementsByTagName('button');
+const alerts = document.querySelectorAll('.alert');
+const buttons = document.getElementsByTagName('button');
+const iterationSpan = document.querySelector('.iteration');
+const statisticsValues = document.querySelectorAll('.value');
+const addInput = document.querySelector('.add-input');
 
 const settingsKey = 'settings';
-if (localStorage.getItem(settingsKey) === null) {
+const historyKey = 'history';
+if (localStorage.getItem(settingsKey) === null && localStorage.getItem(historyKey) === null) {
     localStorage.setItem(settingsKey, '');
+    localStorage.setItem(historyKey, 0);
 }
 
 let alertLabel, alertClass, alertIcon;
@@ -17,10 +23,28 @@ const setAlert = (label, className, icon) => {
     alertClass = className;
     alertIcon = icon;
 }
-const displayAlert = () => {
-    settingsAlert.innerHTML = `${alertIcon}${alertLabel}`;
-    settingsAlert.classList.add(alertClass);
-    setTimeout(() => settingsAlert.classList.remove(alertClass), 5000);
+const displayAlert = (alert) => {
+    alert.innerHTML = `${alertIcon}${alertLabel}`;
+    alert.classList.add(alertClass);
+    setTimeout(() => alert.classList.remove(alertClass), 5000);
+}
+const capitalize = (word) => {
+    return word.charAt(0).toUpperCase().concat(word.slice(1));
+}
+const setValues = (array, parameters, history, value) => {
+    const counter = new Counter(parameters[2], parameters[3], history, value);
+    array.push(
+        `${counter.calculateTotal()} ${parameters[0]}`,
+        `${counter.calculateRemaining()}`,
+        `${Math.round(counter.calculateAverage())} per ${parameters[1]}`,
+        `${counter.calculateMax()}`,
+        `${counter.calculateMin()}`,
+        `${counter.calculateIterations()}`,
+        `${Math.round(counter.calculatePercentage())}%`
+    );
+    for (let i = 0; i < statisticsValues.length; i ++) {
+        statisticsValues[i].textContent = array[i];
+    }
 }
 
 let loadSettings = [];
@@ -32,19 +56,30 @@ const save = function() {
         loadSettings = [];
         setAlert('You must fill all fields first.', 'alert--error', icons.error);
     } else {
-        for (let i = 0; i < settingsInputs.length; i ++) {
-            settingsInputs[i].value = loadSettings[i];
-            settingsInputs[i].setAttribute('disabled', true);
+        if (Number(loadSettings[2]) <= 0 || Number(loadSettings[3]) <= 0) {
+            loadSettings = [];
+            setAlert('Count target and minimum average must be greater than 0.', 'alert--error', icons.error);
+        } else {
+            for (let i = 0; i < settingsInputs.length; i ++) {
+                if (i < 2) {
+                    settingsInputs[i].value = capitalize(loadSettings[i]);
+                } else {
+                    settingsInputs[i].value = loadSettings[i];
+                }
+                settingsInputs[i].setAttribute('disabled', true);
+            }
+            iterationSpan.textContent = `${capitalize(loadSettings[1])} count:`;
+            loadSettings.push('disabled');
+            loadSettings = loadSettings.join(',');
+            localStorage.setItem(settingsKey, loadSettings);
+            loadSettings = [];
+            setAlert('Settings were successfuly saved.', 'alert--done', icons.check);
+            buttons[0].setAttribute('disabled', true);
+            buttons[1].removeAttribute('disabled');
+            buttons[2].removeAttribute('disabled');
         }
-        loadSettings.push('disabled', 'enabled');
-        loadSettings = loadSettings.join(',');
-        localStorage.setItem(settingsKey, loadSettings);
-        loadSettings = [];
-        setAlert('Settings were successfuly saved.', 'alert--done', icons.check);
-        settingsButtons[0].setAttribute('disabled', true);
-        settingsButtons[1].removeAttribute('disabled');
     }
-    displayAlert();
+    displayAlert(alerts[0]);
 }
 const reset = function() {
     for (let i = 0; i < settingsInputs.length; i ++) {
@@ -52,26 +87,54 @@ const reset = function() {
         settingsInputs[i].removeAttribute('disabled');
     }
     setAlert('Settings were reset.', 'alert--info', icons.info);
-    displayAlert();
+    displayAlert(alerts[0]);
     localStorage.setItem(settingsKey, '');
-    settingsButtons[0].removeAttribute('disabled');
-    settingsButtons[1].setAttribute('disabled', true);
+    localStorage.setItem(historyKey, 0);
+    buttons[0].removeAttribute('disabled');
+    buttons[1].setAttribute('disabled', true);
+    buttons[2].setAttribute('disabled', true);
+    iterationSpan.textContent = '';
+    for (let i = 0; i < statisticsValues.length; i ++) {
+        statisticsValues[i].textContent = '-';
+    }
+}
+let loadHistory = localStorage.getItem('history');
+const count = function() {
+    let value = Number(addInput.value);
+    if (value === 0 || value < 0) {
+        setAlert('Value must be greater than 0.', 'alert--error', icons.error);
+    } else {
+        loadHistory = loadHistory.concat(`,${value}`);
+        localStorage.setItem('history', loadHistory);
+        const parameters = localStorage.getItem('settings').split(',');
+        parameters.pop();
+        const loadValues = [];
+        setValues(loadValues, parameters, loadHistory, value);
+        setAlert('Done!', 'alert--done', icons.check);
+    }
+    displayAlert(alerts[1]);
+    addInput.value = '';
 }
 
-const commands = [save, reset];
+const commands = [save, reset, count];
 for (let i = 0; i < commands.length; i ++) {
-    settingsButtons[i].addEventListener('click', commands[i]);
+    buttons[i].addEventListener('click', commands[i]);
 }
 
 const settings = localStorage.getItem('settings').split(',');
+const history = localStorage.getItem('history').split(',');
 let isSaveEnabled = settings[4] === undefined || settings[4] === 'enabled' ? true : false;
 if (!isSaveEnabled) {
     for (let i = 0; i < settingsInputs.length; i ++) {
         settingsInputs[i].value = settings[i];
         settingsInputs[i].setAttribute('disabled', true);
     }
-    settingsButtons[0].setAttribute('disabled', true);
-    settingsButtons[1].removeAttribute('disabled');
+    buttons[0].setAttribute('disabled', true);
+    buttons[1].removeAttribute('disabled');
+    buttons[2].removeAttribute('disabled');
+    iterationSpan.textContent = `${capitalize(settings[1])} count:`
+    const values = [];
+    setValues(values, settings, history.join(','), history[history.length - 1]);
+    console.log()
 }
-
-//localStorage.clear();
+//localStorage.setItem('history', 0);
