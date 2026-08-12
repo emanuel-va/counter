@@ -1,0 +1,25 @@
+/* style.css */
+
+* {
+    margin: 0;
+    padding: 0;
+    font-size: 1rem;
+}
+main {
+    width: 80%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+section {
+    background-color: #eee;
+}
+.alert {
+    display: none;
+}
+.alert--error,
+.alert--done,
+.alert--info {
+    display: block;
+}
