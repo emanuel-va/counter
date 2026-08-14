@@ -1,13 +1,11 @@
 // counter.js
 
 export class Counter {
-    constructor(target, minAverage, history, value) {
+    constructor(target, minAverage, history) {
         this.target = target;
         this.minAverage = minAverage;
         this.history = history.split(',').map(i => Number(i));
         this.history.shift();
-        this.value = value;
-        this.isValueOk = this.value > this.minAverage;
         this.total = 0;
     }
     calculateTotal() {
