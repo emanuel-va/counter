@@ -6,7 +6,8 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Counter</title>
-        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="styles/style.css">
+        <link rel="stylesheet" href="styles/fonts.css">
     </head>
     <body>
         <main>
@@ -28,7 +29,7 @@
                     <button disabled></button>
                 </div>
             </section>
-            <section>
+            <section class="statistics">
                 <h2></h2>
                 <div class="wrapper">
                     <span>Total:</span>
@@ -50,7 +51,7 @@
             </section>
             <section>
                 <h2></h2>
-                <div>
+                <div class="add-wrapper">
                     <input class="add-input" type="number" inputmode="numeric" placeholder="0" disabled>
                     <span class="alert"></span>
                     <button disabled></button>
@@ -59,6 +60,10 @@
             <section>
                 <h2></h2>
                 <div class="history"></div>
+            </section>
+            <section class="copyright">
+                <a class="github" href="https://github.com/emanuel-va/counter" target="_blank"></a>
+                <span>Copyright &copy; 2026</span>
             </section>
         </main>
         <script type="module" src="scripts/script.js"></script>

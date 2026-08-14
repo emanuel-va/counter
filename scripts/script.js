@@ -10,10 +10,12 @@ const settingsInputs = document.querySelector('.settings').getElementsByTagName(
 const alerts = document.querySelectorAll('.alert');
 const buttons = document.getElementsByTagName('button');
 const iterationSpan = document.querySelector('.iteration');
+const statisticsSpans = document.querySelector('.statistics').querySelector('.wrapper').getElementsByTagName('span');
 const statisticsValues = document.querySelectorAll('.value');
 const progressBar = document.querySelector('.bar');
 const addInput = document.querySelector('.add-input');
 const historyBox = document.querySelector('.history');
+const github = document.querySelector('.github');
 
 // setting headers & buttons
 const headerLabels = ['Settings', 'Statistics', 'Add', 'History']; // defining labels for headers
@@ -26,6 +28,12 @@ const buttonIcons = [icons.save, icons.delete, icons.calculate]; // defining ico
 for (let i = 0; i < buttons.length; i ++) {
     buttons[i].innerHTML = `${buttonIcons[i]}<span>${buttonLabels[i]}</span>`; // defining format for buttons
 }
+for (let i = 0; i < statisticsSpans.length; i ++) {
+    if (i % 2 !== 0) { // selecting only odd indexes
+        statisticsSpans[i].style.justifySelf = 'end'; // aligning at right
+    }
+}
+github.innerHTML = `${icons.github}<span>GitHub</>`;
 
 // starting local storage
 const settingsKey = 'settings';
@@ -80,15 +88,18 @@ const setValues = (array, parameters, history) => { // creating a function for d
     } else {
         const counter = new Counter(parameters[2], parameters[3], history);
         array.push( // if not empty statistics values will be calculated by counter class
-            `${counter.calculateTotal()} ${parameters[0]}`,
-            `${counter.calculateRemaining()}`,
-            `${Math.round(counter.calculateAverage())} per ${parameters[1]}`,
-            `${counter.calculateMax()}`,
-            `${counter.calculateMin()}`,
-            `${counter.calculateIterations()}`,
+            `${counter.calculateTotal().toLocaleString()}`,
+            `${counter.calculateRemaining().toLocaleString()}`,
+            `${Math.round(counter.calculateAverage()).toLocaleString()}`,
+            `${counter.calculateMax().toLocaleString()}`,
+            `${counter.calculateMin().toLocaleString()}`,
+            `${counter.calculateIterations().toLocaleString()}`,
             `${Math.round(counter.calculatePercentage())}%`
         );
         progressBar.style.width = `${counter.calculatePercentage()}%`; // filling progress bar
+        if (counter.calculatePercentage() >= 100) {
+            progressBar.style.borderRadius = '0 0 15px 15px';
+        }
     }
     for (let i = 0; i < statisticsValues.length; i ++) {
         statisticsValues[i].textContent = array[i]; // displaying values in document
@@ -101,17 +112,18 @@ const addHistoryItem = (label, value, date) => { // defining a function for addi
         const itemValue = document.createElement('span'); // creating item value
         const itemDate = document.createElement('span'); // creating item save date
         item.classList.add(classes[3]); // adding a class for identify history items
-        item.style.display = 'flex'; // showing items
-        let itemValueClass = value < localStorage.getItem(settingsKey).split(',')[3] ? classes[4] : classes[5]; // defining item value class as a function of if it is less than setted minimum average
-        itemValue.classList.add(itemValueClass); // adding item value class
+        let itemDataClass = value < localStorage.getItem(settingsKey).split(',')[3] ? classes[4] : classes[5]; // defining item value class as a function of if it is less than setted minimum average
+        itemLabel.classList.add(itemDataClass); // adding item label class
         itemLabel.textContent = label; // setting item counter
-        itemValue.textContent = value; // setting item value
+        itemValue.classList.add(itemDataClass); // adding item value class
+        itemValue.textContent = Number(value).toLocaleString(); // setting item value
         itemDate.textContent = date; // setting item save date
         const childs = [itemLabel, itemValue, itemDate];
         for (let i = 0; i < childs.length; i ++) {
             item.appendChild(childs[i]); // adding items data to item box
         }
         historyBox.appendChild(item); // adding item box to history
+        historyBox.style.display = 'flex'; // showing items
     }
 }
 
@@ -175,9 +187,7 @@ const reset = function() { // defining a function for reset all document setting
     }
     progressBar.style.width = '0%'; // emptying progress bar
     const historyItem = document.querySelectorAll(`.${classes[3]}`); // defining current history items elements
-    for (let i = 0; i < historyItem.length; i ++) {
-        historyItem[i].style.display = 'none'; // deleting items from history box
-    }
+    historyBox.style.display = 'none'; // removing history box
     document.addEventListener('keydown', saveEnterHandler); // adding 'enter' key to 'save' command
     document.removeEventListener('keydown', countEnterHandler); // removing 'enter' key from 'count' command
     setAlert(alertLabels[3], classes[2], icons.info);
@@ -200,7 +210,7 @@ const count = function() { // defining a function for display all calculated val
         let today = `${date.getMonth()}-${date.getDate()}-${date.getFullYear()}`; // defining a formatted date
         loadDate = loadDate.concat(`,${today}`); // adding a ',' at string start for split multiple dates
         localStorage.setItem(datesKey, loadDate); // saving date into local storage
-        let label = `${localStorage.getItem(historyKey).split(',').length - 1}.`; // defining a label for count iterations
+        let label = localStorage.getItem(historyKey).split(',').length - 1; // defining a label for count iterations
         addHistoryItem(label, value, today); // displaying history items
         setAlert(alertLabels[5], classes[1], icons.check); 
     }
@@ -248,12 +258,13 @@ if (!isSaveEnabled) { // validating if 'save' button is disabled
     buttons[1].removeAttribute('disabled');
     buttons[2].removeAttribute('disabled');
     iterationSpan.textContent = `${capitalize(settings[1])} count:`; // displaying iteration label at reload
+    addInput.removeAttribute('disabled');
     const values = []; // defining an new array to storage all local storage returned values at reload
     setValues(values, settings, history.join(',')); // displaying values in document at reload
     history.shift(); // removing '0' value at start from history array
     dates.shift(); // removing '0' value at start from dates array
     for (let i = 0; i < history.length; i ++) {
-        addHistoryItem(`${i + 1}.`, history[i], dates[i]); // displaying history items getted from local storage
+        addHistoryItem(i + 1, history[i], dates[i]); // displaying history items getted from local storage
     }
     document.removeEventListener('keydown', saveEnterHandler); // removing 'enter' key from 'save' command at site reload
     document.addEventListener('keydown', countEnterHandler); // adding 'enter' key to 'count' command at site reload

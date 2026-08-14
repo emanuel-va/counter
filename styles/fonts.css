@@ -1,0 +1,12 @@
+/* fonts.css */
+
+@font-face {
+    font-family: kode-mono; /* regular */
+    src: url("../assets/fonts/KodeMono-Regular.ttf") format("truetype");
+    font-weight: normal;
+}
+@font-face {
+    font-family: kode-mono; /* bold */
+    src: url("../assets/fonts/KodeMono-Bold.ttf") format("truetype");
+    font-weight: bold;
+}
