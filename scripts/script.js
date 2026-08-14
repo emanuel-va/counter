@@ -116,14 +116,14 @@ const addHistoryItem = (label, value, date) => { // defining a function for addi
         itemLabel.classList.add(itemDataClass); // adding item label class
         itemLabel.textContent = label; // setting item counter
         itemValue.classList.add(itemDataClass); // adding item value class
-        itemValue.textContent = Number(value).toLocaleString(); // setting item value
+        itemValue.textContent = `${Number(value).toLocaleString()} ${localStorage.getItem(settingsKey).split(',')[0]}`; // setting item value
         itemDate.textContent = date; // setting item save date
         const childs = [itemLabel, itemValue, itemDate];
         for (let i = 0; i < childs.length; i ++) {
             item.appendChild(childs[i]); // adding items data to item box
         }
         historyBox.appendChild(item); // adding item box to history
-        historyBox.style.display = 'flex'; // showing items
+        historyBox.style.display = 'grid'; // showing items
     }
 }
 
@@ -264,7 +264,7 @@ if (!isSaveEnabled) { // validating if 'save' button is disabled
     history.shift(); // removing '0' value at start from history array
     dates.shift(); // removing '0' value at start from dates array
     for (let i = 0; i < history.length; i ++) {
-        addHistoryItem(i + 1, history[i], dates[i]); // displaying history items getted from local storage
+        addHistoryItem(i + 1, Number(history[i]), dates[i]); // displaying history items getted from local storage
     }
     document.removeEventListener('keydown', saveEnterHandler); // removing 'enter' key from 'save' command at site reload
     document.addEventListener('keydown', countEnterHandler); // adding 'enter' key to 'count' command at site reload
