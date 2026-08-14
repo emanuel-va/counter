@@ -109,7 +109,7 @@ button {
     gap: var(--spacing);
 }
 .copyright {
-    align-items: center
+    align-items: center;
 }
 .github {
     width: 100%;
@@ -131,6 +131,10 @@ button {
 }
 
 /* ---------- text ---------- */
+h1 {
+    font-size: 2.5rem;
+    color: var(--gray7);
+}
 h2 {
     display: flex;
     align-items: center;
@@ -249,4 +253,46 @@ button svg {
 .history__item span:last-child {
     color: var(--gray5);
     font-size: .8rem;
+}
+
+/* ---------- responsive ---------- */
+@media screen and (min-width: 426px) and (max-width: 768px) {
+    main {
+        width: 50%
+    }
+}
+@media screen and (min-width: 769px) {
+    main {
+        width: 60%;
+        display: grid;
+        grid-template-areas:
+        "header header header copyright"
+        "statistics statistics settings settings"
+        "add add history history";
+        grid-template-columns: repeat(4, 1fr);
+    }
+    header {
+        grid-area: header;
+        display: flex;
+        align-items: center;
+    }
+    .settings {
+        grid-area: settings;
+    }
+    .statistics {
+        grid-area: statistics;
+    }
+    .add {
+        grid-area: add;
+        height: fit-content;
+    }
+    .hist {
+        grid-area: history;
+    }
+    .copyright {
+        grid-area: copyright;
+    }
+    .settings .button-wrapper {
+        margin-top: auto;
+    }
 }

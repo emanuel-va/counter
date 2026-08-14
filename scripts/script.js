@@ -123,7 +123,7 @@ const addHistoryItem = (label, value, date) => { // defining a function for addi
             item.appendChild(childs[i]); // adding items data to item box
         }
         historyBox.appendChild(item); // adding item box to history
-        historyBox.style.display = 'grid'; // showing items
+        historyBox.style.display = 'flex'; // showing items
     }
 }
 
